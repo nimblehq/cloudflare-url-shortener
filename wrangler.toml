@@ -1,0 +1,11 @@
+name = "cloudflare-url-shortener"
+main = "src/index.js"
+compatibility_date = "2025-06-20"
+logpush = true
+
+[observability]
+enabled = true
+
+[[kv_namespaces]]
+binding = "SHORT_URL_STORE"
+id = "${SHORT_URL_STORE_ID}"
