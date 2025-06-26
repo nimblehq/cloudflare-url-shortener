@@ -6,49 +6,52 @@
     <title>URL Shortener</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 p-5 font-sans">
-    <div class="max-w-2xl mx-auto bg-white/95 backdrop-blur rounded-2xl p-10 shadow-2xl">
-        <h1 class="text-center text-gray-800 mb-10 text-3xl font-bold">🔗 URL Shortener</h1>
-        
-        <div class="bg-white p-8 rounded-xl mb-8 shadow">
-            <form id="shortenForm">
-                <div class="mb-5">
-                    <label class="block mb-2 font-semibold text-gray-600" for="url">URL to Shorten:</label>
-                    <input class="w-full p-4 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-indigo-500" type="url" id="url" name="url" required placeholder="https://example.com/very/long/url">
+<body class="min-h-screen bg-gray-100 font-sans">
+    <div class="flex h-screen">
+        <aside class="hidden md:block w-64 bg-[#3C50E0] text-white p-6">
+            <h1 class="text-2xl font-bold mb-8">TailAdmin</h1>
+            <nav>
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="block rounded px-3 py-2 bg-white/10">Dashboard</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <main class="flex-1 overflow-y-auto p-6">
+            <h2 class="text-2xl font-semibold mb-6">URL Shortener</h2>
+            <div class="grid gap-6">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <form id="shortenForm" class="space-y-4">
+                        <div>
+                            <label class="block mb-2 font-medium text-gray-700" for="url">URL to Shorten:</label>
+                            <input class="w-full p-3 border border-gray-300 rounded" type="url" id="url" name="url" required placeholder="https://example.com/very/long/url">
+                        </div>
+                        <div>
+                            <label class="block mb-2 font-medium text-gray-700" for="customPath">Custom Path (optional):</label>
+                            <input class="w-full p-3 border border-gray-300 rounded" type="text" id="customPath" name="customPath" placeholder="my-custom-link">
+                        </div>
+                        <div class="flex flex-wrap gap-4">
+                            <button type="submit" class="px-5 py-3 bg-[#3C50E0] text-white rounded hover:bg-[#1e2bb1] flex-1 min-w-[8rem]">Shorten URL</button>
+                            <button type="button" class="px-5 py-3 bg-gray-200 text-gray-800 rounded border border-gray-300 hover:bg-gray-300 flex-1 min-w-[8rem]" onclick="loadLinks()">Refresh Links</button>
+                        </div>
+                    </form>
+                    <div id="result" class="mt-4"></div>
                 </div>
-                
-                <div class="mb-5">
-                    <label class="block mb-2 font-semibold text-gray-600" for="customPath">Custom Path (optional):</label>
-                    <input class="w-full p-4 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-indigo-500" type="text" id="customPath" name="customPath" placeholder="my-custom-link">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-medium mb-4">Your Short Links</h3>
+                    <div id="linksList">Loading...</div>
                 </div>
-                
-                <div class="flex gap-4 flex-wrap">
-                    <button type="submit" class="py-4 px-6 rounded-lg text-base font-semibold transition-all flex-1 min-w-[8rem] bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:-translate-y-0.5 hover:shadow-lg">Shorten URL</button>
-                    <button type="button" class="py-4 px-6 rounded-lg text-base font-semibold transition-all flex-1 min-w-[8rem] bg-gray-100 text-gray-800 border border-gray-300 hover:bg-gray-200" onclick="loadLinks()">Refresh Links</button>
-                </div>
-            </form>
-            
-            <div id="result"></div>
-        </div>
-        
-        <div class="bg-white p-8 rounded-xl shadow">
-            <h2 class="mb-5 text-gray-800">📋 Your Short Links</h2>
-            <div id="linksList">Loading...</div>
-        </div>
+            </div>
+        </main>
     </div>
-
     <script>
-        // Load existing links on page load
         document.addEventListener('DOMContentLoaded', loadLinks);
-        
-        // Handle form submission
         document.getElementById('shortenForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const url = document.getElementById('url').value;
             const customPath = document.getElementById('customPath').value;
             const resultDiv = document.getElementById('result');
-            
             try {
                 const response = await fetch('/api/shorten', {
                     method: 'POST',
@@ -57,89 +60,68 @@
                     },
                     body: JSON.stringify({ url, customPath })
                 });
-                
                 const data = await response.json();
-                
                 if (response.ok) {
-                    resultDiv.innerHTML = \`
-                        <div class="mt-5 p-5 rounded-lg font-semibold bg-green-100 text-green-800 border border-green-200">
-                            ✅ Short URL created successfully!
-                            <div class="font-mono bg-gray-100 p-2 rounded border border-gray-300 mt-2 break-all">\${data.shortUrl}</div>
-                        </div>
-                    \`;
+                    resultDiv.innerHTML = `
+                        <div class="p-4 rounded bg-green-100 text-green-800 border border-green-200">
+                            Short URL created successfully!
+                            <div class="mt-2 font-mono bg-gray-100 p-2 rounded border border-gray-300 break-all">${data.shortUrl}</div>
+                        </div>`;
                     document.getElementById('shortenForm').reset();
                     loadLinks();
                 } else {
-                    resultDiv.innerHTML = \`
-                        <div class="mt-5 p-5 rounded-lg font-semibold bg-red-100 text-red-800 border border-red-200">
-                            ❌ Error: \${data.error}
-                        </div>
-                    \`;
+                    resultDiv.innerHTML = `
+                        <div class="p-4 rounded bg-red-100 text-red-800 border border-red-200">
+                            Error: ${data.error}
+                        </div>`;
                 }
             } catch (error) {
-                resultDiv.innerHTML = \`
-                    <div class="mt-5 p-5 rounded-lg font-semibold bg-red-100 text-red-800 border border-red-200">
-                        ❌ Network error: \${error.message}
-                    </div>
-                \`;
+                resultDiv.innerHTML = `
+                    <div class="p-4 rounded bg-red-100 text-red-800 border border-red-200">
+                        Network error: ${error.message}
+                    </div>`;
             }
         });
-        
-        // Load and display all links
         async function loadLinks() {
             const linksDiv = document.getElementById('linksList');
-            
             try {
                 const response = await fetch('/api/links');
                 const links = await response.json();
-                
                 if (links.length === 0) {
-                    linksDiv.innerHTML = '<p class="text-center text-gray-600 italic">No short links created yet.</p>';
+                    linksDiv.innerHTML = '<p class="text-gray-600 italic">No short links created yet.</p>';
                     return;
                 }
-                
-                linksDiv.innerHTML = links.map(link => \`
-                    <div class="flex justify-between items-center p-4 border border-gray-200 rounded-lg mb-2 bg-gray-100" id="link-\${link.path}">
+                linksDiv.innerHTML = links.map(link => `
+                    <div class="flex justify-between items-center p-4 border border-gray-200 rounded mb-2 bg-gray-50" id="link-${link.path}">
                         <div class="flex-1 mr-4">
-                            <div class="font-semibold text-indigo-600 font-mono">
-                                <a href="/\${link.path}" target="_blank">\${window.location.origin}/\${link.path}</a>
+                            <div class="font-semibold text-[#3C50E0] font-mono">
+                                <a href="/${link.path}" target="_blank">${window.location.origin}/${link.path}</a>
                             </div>
-                            <div class="text-gray-700 break-all mt-1">→ \${link.url}</div>
+                            <div class="text-gray-700 break-all mt-1">→ ${link.url}</div>
                         </div>
                         <div class="flex gap-2">
-                            <button class="py-2 px-3 text-sm rounded-md bg-yellow-400 text-gray-800" onclick="editLink('\${link.path}', '\${link.url}')">
-                                ✏️ Edit
-                            </button>
-                            <button class="py-2 px-3 text-sm rounded-md bg-red-600 text-white" onclick="deleteLink('\${link.path}')">
-                                🗑️ Delete
-                            </button>
+                            <button class="px-3 py-2 text-sm rounded bg-yellow-400 text-gray-800" onclick="editLink('${link.path}', '${link.url}')">Edit</button>
+                            <button class="px-3 py-2 text-sm rounded bg-red-600 text-white" onclick="deleteLink('${link.path}')">Delete</button>
                         </div>
-                    </div>
-                \`).join('');
+                    </div>`).join('');
             } catch (error) {
-                linksDiv.innerHTML = \`<p class="text-red-600">Error loading links: \${error.message}</p>\`;
+                linksDiv.innerHTML = `<p class="text-red-600">Error loading links: ${error.message}</p>`;
             }
         }
-        
-        // Edit link functionality
         function editLink(path, currentUrl) {
-            const linkItem = document.getElementById(\`link-\${path}\`);
-            const editForm = \`
-                <div class="mt-4 p-4 bg-white rounded-md border-2 border-indigo-500">
-                    <input class="w-full p-2 border-2 border-gray-200 rounded-lg text-base focus:outline-none focus:border-indigo-500" type="url" id="edit-url-\${path}" value="\${currentUrl}" placeholder="New URL">
-                    <div class="flex gap-4 flex-wrap">
-                        <button class="py-2 px-3 text-sm rounded-md bg-indigo-500 text-white hover:bg-indigo-600" onclick="saveEdit('\${path}')">💾 Save</button>
-                        <button class="py-2 px-3 text-sm rounded-md bg-gray-100 text-gray-800 border border-gray-300 hover:bg-gray-200" onclick="cancelEdit('\${path}')">❌ Cancel</button>
+            const linkItem = document.getElementById(`link-${path}`);
+            const editForm = `
+                <div class="mt-4 p-4 bg-white rounded border-2 border-[#3C50E0]">
+                    <input class="w-full p-2 border border-gray-300 rounded" type="url" id="edit-url-${path}" value="${currentUrl}" placeholder="New URL">
+                    <div class="flex gap-4 mt-2">
+                        <button class="px-3 py-2 text-sm rounded bg-[#3C50E0] text-white" onclick="saveEdit('${path}')">Save</button>
+                        <button class="px-3 py-2 text-sm rounded bg-gray-200 text-gray-800 border border-gray-300" onclick="cancelEdit('${path}')">Cancel</button>
                     </div>
-                </div>
-            \`;
+                </div>`;
             linkItem.innerHTML += editForm;
         }
-        
-        // Save edit
         async function saveEdit(path) {
-            const newUrl = document.getElementById(\`edit-url-\${path}\`).value;
-            
+            const newUrl = document.getElementById(`edit-url-${path}`).value;
             try {
                 const response = await fetch('/api/update', {
                     method: 'PUT',
@@ -148,7 +130,6 @@
                     },
                     body: JSON.stringify({ path, url: newUrl })
                 });
-                
                 if (response.ok) {
                     loadLinks();
                 } else {
@@ -159,18 +140,13 @@
                 alert('Network error: ' + error.message);
             }
         }
-        
-        // Cancel edit
         function cancelEdit(path) {
             loadLinks();
         }
-        
-        // Delete link
         async function deleteLink(path) {
-            if (!confirm(\`Are you sure you want to delete the short link "/$\{path}"?\`)) {
+            if (!confirm(`Are you sure you want to delete the short link "/${path}"?`)) {
                 return;
             }
-            
             try {
                 const response = await fetch('/api/delete', {
                     method: 'DELETE',
@@ -179,7 +155,6 @@
                     },
                     body: JSON.stringify({ path })
                 });
-                
                 if (response.ok) {
                     loadLinks();
                 } else {
