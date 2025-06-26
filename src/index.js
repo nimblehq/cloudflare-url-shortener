@@ -658,11 +658,19 @@ async function handleUpdateLink(request, env, corsHeaders) {
     // Update the URL mapping
     await env.SHORT_URL_STORE.put(path, newUrl);
     
-    // Update metadata
+    // Retrieve existing metadata to preserve creation date
+    let existingMetadata;
+    try {
+        const stored = await env.SHORT_URL_STORE.get(`meta:${path}`);
+        existingMetadata = stored ? JSON.parse(stored) : null;
+    } catch (_) {
+        existingMetadata = null;
+    }
+
     const metadata = {
         path,
         url: newUrl,
-        created: new Date().toISOString(),
+        created: existingMetadata?.created || new Date().toISOString(),
         updated: new Date().toISOString()
     };
     await env.SHORT_URL_STORE.put(`meta:${path}`, JSON.stringify(metadata));
